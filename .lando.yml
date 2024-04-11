@@ -1,0 +1,11 @@
+name: internals
+config:
+  composer_version: '2'
+  php: '8.3'
+  services:
+    database: disabled
+  webroot: public
+excludes:
+  - node_modules
+  - vendor
+recipe: laravel
