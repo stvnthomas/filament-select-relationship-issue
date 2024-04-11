@@ -1,0 +1,33 @@
+# Composer
+/vendor
+auth.json
+
+# JetBrains
+/.fleet
+/.idea
+
+# Laravel
+/.phpunit.cache
+/public/build
+/public/hot
+/public/storage
+/storage/*.key
+Homestead.json
+Homestead.yaml
+.env
+.env.backup
+.env.production
+.phpunit.result.cache
+
+# MacOS
+.DS_Store
+
+# Node
+/node_modules
+npm-debug.log
+
+# Visual Studio Code
+/.vscode
+
+# Vite
+/.vite
