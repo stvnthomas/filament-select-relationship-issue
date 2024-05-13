@@ -3,9 +3,11 @@
 namespace App\Providers\Filament;
 
 use App\Filament\Auth\Login;
+use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
+use Filament\Navigation\NavigationItem;
 use Filament\Pages;
 use Filament\Panel;
 use Filament\PanelProvider;
@@ -54,6 +56,11 @@ class AppPanelProvider extends PanelProvider
                 'primary' => Color::Sky,
                 'gray' => Color::Slate,
             ])
+            ->navigationItems([
+                NavigationItem::make()
+                    ->label('')
+                    ->sort(90),
+            ])
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\\Filament\\Pages')
             ->pages([
@@ -76,6 +83,9 @@ class AppPanelProvider extends PanelProvider
                 Authenticate::class,
             ])
             ->databaseNotifications()
+            ->plugins([
+                FilamentShieldPlugin::make(),
+            ])
             ->profile()
             ->readOnlyRelationManagersOnResourceViewPagesByDefault(false)
             ->spa();
