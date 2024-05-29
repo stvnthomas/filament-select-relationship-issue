@@ -6,15 +6,14 @@ use Filament\Forms\Components\Component;
 
 class Login extends \Filament\Pages\Auth\Login
 {
-    protected function getEmailFormComponent(): Component
+    public function mount(): void
     {
-        return parent::getEmailFormComponent()
-            ->label('Email Address');
-    }
+        parent::mount();
 
-    protected function getPasswordFormComponent(): Component
-    {
-        return parent::getPasswordFormComponent()
-            ->label('Password');
+        $this->form->fill([
+            'email' => 'user1@example.com',
+            'password' => 'password',
+            'remember' => true,
+        ]);
     }
 }

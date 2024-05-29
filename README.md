@@ -1,66 +1,51 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+In this repo, I'm using the Shield plugin for the user roles/permissions in my Filament panel. The user resource has the following select field with relationship-sourced options for the role assignement. The issue isn't specific to the Shield plugin, that's just where I initially noticed the issue and the code I have on-hand.
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+```
+Forms\Components\Select::make('roles')
+    ->label('Role')
+    ->preload()
+    ->relationship(titleAttribute: 'name')
+    ->required()
+    ->searchable(),
+```
 
-## About Laravel
+Since Filament 3.2.79, setting the role causes the following error when saving:
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+```
+array_diff(): Argument #2 must be of type array, string given
+```
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+Downgrading to 3.2.78 fixes the issue. The issue isn't present when using `options()` with the select. The error appears to originate on [Select.php#L994-L1000](https://github.com/filamentphp/filament/blob/0699ac595508a94cf62fd12ece1279d67f463151/packages/forms/src/Components/Select.php#L994-L1000). It seems to be expecting an array but the select is returning a single value.
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+## Steps to reproduce the issue
 
-## Learning Laravel
+**1. Clone the repo**
+`git clone <url>`
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+**2. CD into the project**
+`cd filament-select-relationship-issue`
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+**3. Composer**
+`composer install`
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+**4. Create the .env config**
+`cp .env.example .env`
 
-## Laravel Sponsors
+**5. Generate the application key**
+`php artisan key:generate`
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+**6. Serve the project**
+`php artisan serve`
 
-### Premium Partners
+**7. Login**
+Vist `http://127.0.0.1:8000` and log in - the user/pass is preconfigured.
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[WebReinvent](https://webreinvent.com/)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Jump24](https://jump24.co.uk)**
-- **[Redberry](https://redberry.international/laravel/)**
-- **[Active Logic](https://activelogic.com)**
-- **[byte5](https://byte5.de)**
-- **[OP.GG](https://op.gg)**
+**8. Create a user**
+Navigate to the user resource and create a new user. The user will be created but the selected role will not be assigned. The application will error with the following:
 
-## Contributing
+```
+array_diff(): Argument #2 must be of type array, string given
+```
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
-
-## Code of Conduct
-
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
-
-## Security Vulnerabilities
-
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
-
-## License
-
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+**9. Edit a user**
+The same will happen if you edit a user and assign a new role.
